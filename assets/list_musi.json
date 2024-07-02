@@ -1,0 +1,17 @@
+{
+    "items":
+    [
+        {
+            "image": "assets/1045.jpg",
+            "text": "Item 1",
+            "author": "Ngtam",
+            "youtubeID": "1pquvJRgIMY"
+        },
+        {
+            "image": "assets/1045.jpg",
+            "text": "Item 2",
+            "author": "Ng",
+            "youtubeID": "HScTQOhUKDA"
+        }
+    ]
+}
