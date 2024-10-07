@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/home_page.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_2/screen/bottom_sheet.dart';
 import 'package:flutter_application_2/service/video_api.dart';
 import 'package:provider/provider.dart';
 import 'package:text_scroll/text_scroll.dart';
@@ -21,28 +22,47 @@ class VideoScreen extends StatefulWidget {
 }
 
 class _VideoScreenState extends State<VideoScreen> {
-  late YoutubePlayerController _controller;
+  late YoutubePlayerController controller;
+  //late VideoProvider videoManager;
   bool isVideoPlaying = true; //video play or not
   double currentvol = 100;
   late int currentIndex = 0; //theo dõi vị trí của video trong danh sách
-  bool isLooping = true;
+
   @override
   void initState() {
     super.initState();
-    _controller = YoutubePlayerController(
+
+    controller = YoutubePlayerController(
       initialVideoId: widget.youtubeID,
       flags: YoutubePlayerFlags(
         autoPlay: true,
         mute: false,
         hideThumbnail: true,
       ),
-    )..addListener(_playVideoEnded);
-    setState(() {});
+    );
   }
+
+  // void _showBottomSheet(BuildContext context) {
+  //   showBottomSheet(
+  //     context: context,
+  //     builder: (context) {
+  //       return Container(
+  //         color: Colors.white,
+  //         height: 200,
+  //         child: Column(
+  //           children: <Widget>[
+  //             BottomSheetPlayer(
+  //                 controller: controller, title: widget.youtubeID),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
 //play next video when video ended
   void _playVideoEnded() {
-    if (_controller.value.playerState == PlayerState.ended) {
+    if (controller.value.playerState == PlayerState.ended) {
       _playNextVideo(Provider.of<YouTubeService>(context, listen: false));
     }
   }
@@ -52,7 +72,7 @@ class _VideoScreenState extends State<VideoScreen> {
     if (currentIndex < youtubeService.videos.length - 1) {
       setState(() {
         currentIndex++;
-        _controller.load(youtubeService.videos[currentIndex].id);
+        controller.load(youtubeService.videos[currentIndex].id);
       });
     } else {
       print('No more videos in the playlist');
@@ -64,7 +84,7 @@ class _VideoScreenState extends State<VideoScreen> {
     if (currentIndex > 0) {
       setState(() {
         currentIndex--;
-        _controller.load(youtubeService.videos[currentIndex].id);
+        controller.load(youtubeService.videos[currentIndex].id);
       });
     } else {
       print('No more video in the playlist');
@@ -73,12 +93,12 @@ class _VideoScreenState extends State<VideoScreen> {
 
 //replay video
   void _replayVideo() {
-    _controller.load(_controller.metadata.videoId);
+    controller.load(controller.metadata.videoId);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    controller.dispose();
     super.dispose();
   }
 
@@ -86,14 +106,14 @@ class _VideoScreenState extends State<VideoScreen> {
     setState(() {
       currentvol = volume;
     });
-    _controller.setVolume(volume.round());
+    controller.setVolume(volume.round());
   }
 
   @override
   Widget build(BuildContext context) {
     final youtubeService = Provider.of<YouTubeService>(context);
     return YoutubePlayerBuilder(
-      player: YoutubePlayer(controller: _controller),
+      player: YoutubePlayer(controller: controller),
       builder: (context, player) => Material(
         color: Colors.black,
         child: Column(
@@ -104,14 +124,15 @@ class _VideoScreenState extends State<VideoScreen> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      //   Provider.of<BottomSheetManager>(context, listen: false).showBottomSheet();
+                      // _showBottomSheet();
+                      //  Provider.of<BottomSheetManager>(context, listen: false).showBottomSheet();
                       Navigator.pop(
                         context,
                         MaterialPageRoute(
                           builder: (context) => HomePage(),
                         ),
                       );
-                      _controller.pause();
+                      //  controller.pause();
                     },
                     child: Icon(
                       Icons.keyboard_arrow_left,
@@ -139,10 +160,17 @@ class _VideoScreenState extends State<VideoScreen> {
                     ],
                   ),
                   Spacer(),
-                  Icon(
-                    Icons.format_indent_increase,
-                    color: Color.fromARGB(255, 233, 100, 41),
-                  )
+                  IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomePage(),
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.format_indent_decrease),
+                  ),
                 ],
               ),
             ),
@@ -155,7 +183,8 @@ class _VideoScreenState extends State<VideoScreen> {
               child: Column(
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+
                     children: [
                       TextScroll(
                         widget.youtubeTitle,
@@ -181,7 +210,7 @@ class _VideoScreenState extends State<VideoScreen> {
                     onPressed: () {
                       _replayVideo();
                     },
-                    icon: Icon(Icons.replay,color: Colors.white),
+                    icon: Icon(Icons.replay, color: Colors.white),
                   ),
                   IconButton(
                       onPressed: () {
@@ -211,9 +240,9 @@ class _VideoScreenState extends State<VideoScreen> {
                       onPressed: () {
                         setState(() {
                           if (isVideoPlaying) {
-                            _controller.pause();
+                            controller.pause();
                           } else {
-                            _controller.play();
+                            controller.play();
                           }
                           isVideoPlaying = !isVideoPlaying;
                         });

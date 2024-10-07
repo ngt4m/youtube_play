@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/home_page.dart';
+import 'package:flutter_application_2/provider/recently_provider.dart';
 import 'package:flutter_application_2/service/video_api.dart';
 import 'package:provider/provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(create: (context) => YouTubeService(),
-    child: MyApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_)=>YouTubeService()),
+        ChangeNotifierProvider(create: (_)=>RecentlyProvider())
+      ],
+    
+child: MyApp(),
+
     ),
   );
 }

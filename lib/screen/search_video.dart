@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_2/models/search_model.dart';
+import 'package:flutter_application_2/models/playlist_model.dart';
+import 'package:flutter_application_2/provider/recently_provider.dart';
 import 'package:flutter_application_2/screen/video.dart';
 import 'package:flutter_application_2/service/video_api.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +15,8 @@ class SearchVideo extends StatefulWidget {
 
 class _SearchVideoState extends State<SearchVideo> {
   bool typing = false;
-  List<SearchModel> result = [];
+  
+ 
 
   // YouTubeService youtubeService = YouTubeService();
   // Future<void> callAPI() async {
@@ -27,9 +30,9 @@ class _SearchVideoState extends State<SearchVideo> {
   @override
   void initState() {
     super.initState();
+    final videoProvider = Provider.of<YouTubeService>(context, listen: false);
 //listener scroll to bottom -> load more video
     scrollController.addListener(() {
-      final videoProvider = Provider.of<YouTubeService>(context, listen: false);
       if (scrollController.position.pixels ==
               scrollController.position.maxScrollExtent &&
           !videoProvider.isLoading) {
@@ -63,7 +66,6 @@ class _SearchVideoState extends State<SearchVideo> {
             onPressed: () {
               setState(() {
                 if (!typing) {
-                  //có chữ thì tìm kiếm kết quả
                   _searchVideos();
                 }
               });
@@ -78,6 +80,7 @@ class _SearchVideoState extends State<SearchVideo> {
               child: CircularProgressIndicator(),
             );
           }
+          ;
           return ListView.builder(
               controller: scrollController,
               itemCount: videoProvider.search.length +
@@ -100,12 +103,13 @@ class _SearchVideoState extends State<SearchVideo> {
 Widget listItem(SearchModel video, BuildContext context) {
   return GestureDetector(
     onTap: () {
+      Provider.of<RecentlyProvider> (context,listen: false).addVideoFromSearch(video);
       Navigator.push(
         context,
         //-> video screen
         MaterialPageRoute(
           builder: (context) =>
-              VideoScreen(youtubeID: video.videoId, youtubeTitle: video.title),
+              VideoScreen(youtubeID: video.id, youtubeTitle: video.title),
         ),
       );
     },

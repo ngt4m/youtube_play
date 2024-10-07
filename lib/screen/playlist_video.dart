@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_2/models/video_model.dart';
+import 'package:flutter_application_2/models/playlist_model.dart';
+import 'package:flutter_application_2/provider/favorite_provider.dart';
+import 'package:flutter_application_2/provider/recently_provider.dart';
+import 'package:flutter_application_2/provider/video_provider.dart';
 import 'package:flutter_application_2/service/video_api.dart';
-
 import 'package:flutter_application_2/screen/video.dart';
 import 'package:provider/provider.dart';
 
 class VideoListScreen extends StatefulWidget {
-  const VideoListScreen({Key? key}) : super(key: key);
+  const VideoListScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<VideoListScreen> createState() => _VideoListState();
@@ -30,7 +34,9 @@ class _VideoListState extends State<VideoListScreen> {
   //    }
 
   // bool _isLoading = true;
-  //List<ListVideoModel>? _videos;
+  //List<PlaylistModel>? _videos;
+
+  //List<PlaylistModel >  listRecnetly =[];
 
   final ScrollController scrollController = ScrollController();
   @override
@@ -40,6 +46,14 @@ class _VideoListState extends State<VideoListScreen> {
     videoProvider.fetchVideosByPlaylistId();
     scrollController.addListener(() {
       //listener scroll to bottom -> load more video
+      //final scrollPosition = scrollController.position.pixels;
+      // if (scrollPosition >= 100) {
+      //   videoProvider.removeScrolledVideos(scrollPosition);
+      // }
+      // else if (scrollPosition<100){
+      //    videoProvider.reAddScrolledVideos();
+      // }
+
       if (scrollController.position.pixels ==
               scrollController.position.maxScrollExtent &&
           !videoProvider.isLoading) {
@@ -122,24 +136,26 @@ class _VideoListState extends State<VideoListScreen> {
                 }
 
                 return ListView.builder(
+                  cacheExtent: 500.0,
                   controller: scrollController,
                   // playlist length
                   itemCount: videoProvider.videos.length +
                       (videoProvider.isLoading ? 1 : 0),
 
                   itemBuilder: (context, index) {
-                 if (index == videoProvider.videos.length) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                    final ListVideoModel video = videoProvider.videos[index];
+                    if (index == videoProvider.videos.length) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    final PlaylistModel video = videoProvider.videos[index];
 
                     return GestureDetector(
                       onTap: () {
+                        Provider.of<RecentlyProvider>(context, listen: false)
+                            .addVideoFromPlaylist(video);
                         Navigator.push(
                           context,
-                          
                           MaterialPageRoute(
                             builder: (context) => VideoScreen(
                               youtubeID: video.id,
